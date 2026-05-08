@@ -31,7 +31,10 @@ def get_stock_data(ticker: str):
     try:
 
         # Download stock data
-        data = yf.download(ticker, period="1y")
+        # Download Stock Data
+stock = yf.Ticker(ticker)
+
+data = stock.history(period="1y")
           # Fix MultiIndex columns
         if isinstance(data.columns, pd.MultiIndex):
             data.columns = data.columns.get_level_values(0)
