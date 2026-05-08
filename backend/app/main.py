@@ -1,7 +1,6 @@
-from matplotlib import ticker
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 import yfinance as yf
 import pandas as pd
 
@@ -22,6 +21,7 @@ app.add_middleware(
 # Home Route
 @app.get("/")
 def home():
+
     return {
         "message": "Stock Market Analyzer API Running Successfully"
     }
@@ -32,16 +32,17 @@ def get_stock_data(ticker: str):
 
     try:
 
-    # Download Stock Data
-    stock = yf.Ticker(ticker)
+        # Download Stock Data
+        stock = yf.Ticker(ticker)
 
-    data = stock.history(period="1y")
+        data = stock.history(period="1y")
 
-    # Check empty data
-    if data.empty:
-        return {
-            "error": f"No stock data found for ticker: {ticker}"
-        }
+        # Check empty data
+        if data.empty:
+
+            return {
+                "error": f"No stock data found for ticker: {ticker}"
+            }
 
         # Reset index
         data.reset_index(inplace=True)
@@ -53,26 +54,26 @@ def get_stock_data(ticker: str):
         data["Daily Return"] = data["Close"].pct_change()
 
         # Moving Averages
-        data["MA20"] = data["Close"].rolling(20).mean()
+        data["MA20"] = data["Close"].rolling(window=20).mean()
 
-        data["MA50"] = data["Close"].rolling(50).mean()
+        data["MA50"] = data["Close"].rolling(window=50).mean()
 
-        # RSI Calculation (Manual)
+        # RSI Calculation
         delta = data["Close"].diff()
 
         gain = delta.clip(lower=0)
 
         loss = -delta.clip(upper=0)
 
-        avg_gain = gain.rolling(14).mean()
+        avg_gain = gain.rolling(window=14).mean()
 
-        avg_loss = loss.rolling(14).mean()
+        avg_loss = loss.rolling(window=14).mean()
 
         rs = avg_gain / avg_loss
 
         data["RSI"] = 100 - (100 / (1 + rs))
 
-        # MACD Calculation (Manual)
+        # MACD Calculation
         ema12 = data["Close"].ewm(span=12, adjust=False).mean()
 
         ema26 = data["Close"].ewm(span=26, adjust=False).mean()
@@ -92,71 +93,73 @@ def get_stock_data(ticker: str):
             "ticker": ticker.upper(),
 
             "highest_price": round(
-                float(data["High"].max().item()), 2
+                float(data["High"].max()), 2
             ),
 
             "lowest_price": round(
-                float(data["Low"].min().item()), 2
+                float(data["Low"].min()), 2
             ),
 
             "latest_close": round(
-                float(data["Close"].iloc[-1].item()), 2
+                float(data["Close"].iloc[-1]), 2
             ),
 
             "average_volume": round(
-                float(data["Volume"].mean().item()), 2
+                float(data["Volume"].mean()), 2
             ),
 
             "volatility": round(
-                float(volatility.item()), 4
+                float(volatility), 4
             ),
 
             "chart_data": [
 
-   {
-    "date": str(row["Date"])[:10],
+                {
 
-    "open": round(float(row["Open"]), 2),
+                    "date": str(row["Date"])[:10],
 
-    "high": round(float(row["High"]), 2),
+                    "open": round(float(row["Open"]), 2),
 
-    "low": round(float(row["Low"]), 2),
+                    "high": round(float(row["High"]), 2),
 
-    "close": round(float(row["Close"]), 2),
+                    "low": round(float(row["Low"]), 2),
 
-    "ma20": (
-        round(float(row["MA20"]), 2)
-        if pd.notna(row["MA20"])
-        else None
-    ),
+                    "close": round(float(row["Close"]), 2),
 
-    "ma50": (
-        round(float(row["MA50"]), 2)
-        if pd.notna(row["MA50"])
-        else None
-    ),
+                    "ma20": (
+                        round(float(row["MA20"]), 2)
+                        if pd.notna(row["MA20"])
+                        else None
+                    ),
 
-    "rsi": (
-        round(float(row["RSI"]), 2)
-        if pd.notna(row["RSI"])
-        else None
-    ),
+                    "ma50": (
+                        round(float(row["MA50"]), 2)
+                        if pd.notna(row["MA50"])
+                        else None
+                    ),
 
-    "macd": (
-        round(float(row["MACD"]), 2)
-        if pd.notna(row["MACD"])
-        else None
-    ),
+                    "rsi": (
+                        round(float(row["RSI"]), 2)
+                        if pd.notna(row["RSI"])
+                        else None
+                    ),
 
-    "macd_signal": (
-        round(float(row["MACD_SIGNAL"]), 2)
-        if pd.notna(row["MACD_SIGNAL"])
-        else None
-    )
-}
+                    "macd": (
+                        round(float(row["MACD"]), 2)
+                        if pd.notna(row["MACD"])
+                        else None
+                    ),
 
-    for _, row in data.tail(60).iterrows()
-]
+                    "macd_signal": (
+                        round(float(row["MACD_SIGNAL"]), 2)
+                        if pd.notna(row["MACD_SIGNAL"])
+                        else None
+                    )
+
+                }
+
+                for _, row in data.tail(60).iterrows()
+            ]
         }
 
         return response
