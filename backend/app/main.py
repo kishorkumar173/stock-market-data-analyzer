@@ -1,3 +1,5 @@
+from matplotlib import ticker
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import yfinance as yf
@@ -28,7 +30,7 @@ def home():
 @app.get("/stock/{ticker}")
 def get_stock_data(ticker: str):
 
-try:
+    try:
 
     # Download Stock Data
     stock = yf.Ticker(ticker)
