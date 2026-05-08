@@ -28,21 +28,18 @@ def home():
 @app.get("/stock/{ticker}")
 def get_stock_data(ticker: str):
 
-    try:
+try:
 
-        # Download stock data
-        # Download Stock Data
-stock = yf.Ticker(ticker)
+    # Download Stock Data
+    stock = yf.Ticker(ticker)
 
-data = stock.history(period="1y")
-          # Fix MultiIndex columns
-        if isinstance(data.columns, pd.MultiIndex):
-            data.columns = data.columns.get_level_values(0)
-        # Empty check
-        if data.empty:
-            return {
-                "error": "No stock data found"
-            }
+    data = stock.history(period="1y")
+
+    # Check empty data
+    if data.empty:
+        return {
+            "error": f"No stock data found for ticker: {ticker}"
+        }
 
         # Reset index
         data.reset_index(inplace=True)
