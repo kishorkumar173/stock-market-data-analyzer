@@ -129,8 +129,9 @@ Stock-Market-Data-Analyzer/
 ├── screenshots/
 ├── README.md
 └── requirements.txt
+     
 
-⚙️ Installation
+     ⚙️ Installation
 1️⃣ Clone Repository
 git clone https://github.com/yourusername/stock-market-data-analyzer.git
 2️⃣ Backend Setup
@@ -239,4 +240,4 @@ Kishor Kumar L
 
 ⭐ If you like this project
 
-Give this repository a star ⭐ on GitHub.
+Give this repository a star ⭐ on GitHub.git add .
